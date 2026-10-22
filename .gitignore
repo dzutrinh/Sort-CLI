@@ -50,12 +50,12 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
-sortvis-linux
-sortvis-darwin
+sort-cli-linux
+sort-cli-darwin
 .DS_Store
 .vscode/settings.json
 /.vscode
 /.vscode
-sortvis
+sort-cli
 test
-sortvis_test
+sort-cli-test
