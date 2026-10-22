@@ -154,11 +154,14 @@ Tested on macOS (Apple Clang 21). Linux should work as is (`-lm` is in the makef
 The Windows code path (console VT mode, `_getch` input) follows SortVis 0.6 but has
 not been tested with this version.
 
-The screenshots in `screens/` show SortVis 0.6 (the menu version) and are out of date.
-
 **Requirements:**
 * macOS or Linux with a UTF-8, 256-color terminal
 * Windows 10 Build 10586 or later (for VT/ANSI support)
+
+## Screenshots
+![TimSort extending a run](screens/sort-cli-1-timsort.png "TimSort halfway through, extending a run with binary insertion while Bitsy sorts its own bars")
+![Quicksort on a matrix, row by row](screens/sort-cli-2-matrix.png "Quicksort on a 32×12 matrix, every row sorted on its own, plasma gradient")
+![A six-way race](screens/sort-cli-3-race.png "Six algorithms racing on the same 32 values: Shellsort, quicksort and TimSort already done")
 
 ## Changes
 Please see [sort-cli.c](sort-cli.c)
