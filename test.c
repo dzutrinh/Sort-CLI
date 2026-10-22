@@ -430,6 +430,16 @@ static void test_commands(void) {
 		run_cmd(BAD[i]);
 		CHECK(last_bullet_is(C_ERR), "`%s` should be an error", BAD[i]);
 	}
+	run_cmd("/mode 1d");
+	run_cmd("/mode 2d");
+	CHECK(g_mode == M_ROWS, "/mode 2d should sort rows at once, got %s", MODE_NAMES[g_mode]);
+	run_cmd("/mode 1d");
+	run_cmd("/size 12x5");
+	CHECK(g_mode == M_ROWS, "/size WxH from 1D should give rows, got %s", MODE_NAMES[g_mode]);
+	run_cmd("/mode snake");
+	run_cmd("/mode 2d");
+	CHECK(g_mode == M_SNAKE, "/mode 2d should keep a chosen 2D layout");
+	run_cmd("/mode 1d");
 	run_cmd("/run shear");
 	CHECK(last_bullet_is(C_ERR) && transcript_has("matrix"), "shear sort ran in 1D");
 	run_cmd("/size 30");

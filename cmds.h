@@ -309,7 +309,7 @@ static const CMD CMDS[] = {
 	{ "/use",      "<algo>",              "Pick the current algorithm",                cmd_use,      COMP_ALGS },
 	{ "/data",     "[kind] [n|WxH] | v1 v2 …", "Show or make new samples",             cmd_data,     COMP_DATA },
 	{ "/size",     "<n> | <WxH>",         "Number of values (1D) or matrix size (2D)", cmd_size,     COMP_NONE },
-	{ "/mode",     "1d | 2d [layout]",    "Bars, or a matrix: flat, snake, rows, cols", cmd_mode,    COMP_MODE },
+	{ "/mode",     "1d | 2d [layout]",    "Bars, or a matrix: rows (default), cols, flat, snake", cmd_mode, COMP_MODE },
 	{ "/show",     "",                    "Show the current samples",                  cmd_show,     COMP_NONE },
 	{ "/gradient", "[name|reverse|colors…]", "Color gradient, or your own stops",     cmd_gradient, COMP_GRAD },
 	{ "/color",    "[256|truecolor]",     "Color output mode",                         cmd_color,    COMP_COLOR },
@@ -574,7 +574,7 @@ static void cmd_data(int argc, char ** argv) {
 	for (int i = 0; i < argc; i++) {
 		int k;
 		if (parse_int(argv[i], &v)) { if (!set_size_1d(v)) return; g_mode = M_1D; }
-		else if (parse_wxh(argv[i], &w, &h)) { if (!set_size_2d(w, h)) return; if (g_mode == M_1D) g_mode = M_FLAT; }
+		else if (parse_wxh(argv[i], &w, &h)) { if (!set_size_2d(w, h)) return; if (g_mode == M_1D) g_mode = M_ROWS; }
 		else if ((k = find_name(argv[i], KIND_NAMES, K_KINDS - 1)) >= 0) kind = k;
 		else { say(C_ERR, "Unknown kind `%s`. Try random, sorted, reversed, nearly, few, dups, runs, sawtooth or organ.", argv[i]); return; }
 	}
@@ -592,7 +592,7 @@ static void cmd_size(int argc, char ** argv) {
 		return;
 	}
 	if (parse_int(argv[0], &v)) { if (!set_size_1d(v)) return; g_mode = M_1D; }
-	else if (parse_wxh(argv[0], &w, &h)) { if (!set_size_2d(w, h)) return; if (g_mode == M_1D) g_mode = M_FLAT; }
+	else if (parse_wxh(argv[0], &w, &h)) { if (!set_size_2d(w, h)) return; if (g_mode == M_1D) g_mode = M_ROWS; }
 	else { say(C_ERR, "Usage: `/size 40` for bars or `/size 30x12` for a matrix."); return; }
 	if (g_kind == K_CUSTOM) g_kind = K_RANDOM;
 	regen();
@@ -616,9 +616,9 @@ static void cmd_mode(int argc, char ** argv) {
 	int mode = -1, w = 0, h = 0;
 	for (int i = 0; i < argc; i++) {
 		int m;
-		if (!strcmp(argv[i], "2d") || !strcmp(argv[i], "matrix")) { if (mode < 0 || mode == M_1D) mode = g_mode == M_1D ? M_FLAT : g_mode; }
+		if (!strcmp(argv[i], "2d") || !strcmp(argv[i], "matrix")) { if (mode < 0 || mode == M_1D) mode = g_mode == M_1D ? M_ROWS : g_mode; }
 		else if (!strcmp(argv[i], "columns")) mode = M_COLS;
-		else if (parse_wxh(argv[i], &w, &h)) { if (mode < 0 || mode == M_1D) mode = g_mode == M_1D ? M_FLAT : g_mode; }
+		else if (parse_wxh(argv[i], &w, &h)) { if (mode < 0 || mode == M_1D) mode = g_mode == M_1D ? M_ROWS : g_mode; }
 		else if ((m = find_name(argv[i], MODE_NAMES, M_MODES)) >= 0) mode = m;
 		else { say(C_ERR, "Unknown mode `%s`. Try 1d, 2d, flat, snake, rows or cols.", argv[i]); return; }
 	}
@@ -801,14 +801,14 @@ static void natural(int argc, char ** argv) {
 		while (n && strchr(",.?!:;", t[n - 1])) t[--n] = 0;
 		if (!n) continue;
 		if (parse_int(t, &v)) num = v;
-		else if (parse_wxh(t, &w, &h)) { if (mode < 0) mode = M_FLAT; }
+		else if (parse_wxh(t, &w, &h)) { if (mode < 0) mode = M_ROWS; }
 		else if (!strcmp(t, "race") || !strcmp(t, "vs") || !strcmp(t, "versus")) race = true;
 		else if (!strcmp(t, "compare")) compare = true;
 		else if (!strcmp(t, "explain") || !strcmp(t, "how") || !strcmp(t, "what") || !strcmp(t, "why") || !strcmp(t, "describe")) explain = true;
 		else if (!strcmp(t, "step") || !strcmp(t, "slowly")) step = true;
 		else if (!strcmp(t, "help") || !strcmp(t, "commands")) help = true;
 		else if (!strcmp(t, "exit") || !strcmp(t, "quit") || !strcmp(t, "bye")) quit = true;
-		else if (!strcmp(t, "2d") || !strcmp(t, "matrix") || !strcmp(t, "grid")) { if (mode < 0) mode = M_FLAT; }
+		else if (!strcmp(t, "2d") || !strcmp(t, "matrix") || !strcmp(t, "grid")) { if (mode < 0) mode = M_ROWS; }
 		else if (!strcmp(t, "1d") || !strcmp(t, "bars")) mode = M_1D;
 		else if (!strcmp(t, "rows") || !strcmp(t, "row")) mode = M_ROWS;
 		else if (!strcmp(t, "cols") || !strcmp(t, "columns") || !strcmp(t, "column")) mode = M_COLS;
@@ -913,7 +913,7 @@ static int suggest(SUG * s, int * from) {
 			for (int i = 0; i < K_KINDS - 1; i++) sug_add(s, &n, KIND_NAMES[i], KIND_DESC[i], part);
 			break;
 		case COMP_MODE:
-			sug_add(s, &n, "2d", "a matrix (keeps the current layout)", part);
+			sug_add(s, &n, "2d", "a matrix, every row sorted at once (or keep the current layout)", part);
 			for (int i = 0; i < M_MODES; i++) sug_add(s, &n, MODE_NAMES[i], MODE_DESC[i], part);
 			break;
 		case COMP_GRAD:
@@ -1031,7 +1031,7 @@ static void welcome(void) {
 	say_text("1. Type `timsort` or `/run` to watch a sort, `/step heap` to go one step at a time");
 	say_text("2. `/race quick merge heap` runs several on the same data");
 	say_text("3. `/data runs`, `/data dups`, `/seed 42`: change and reproduce the samples");
-	say_text("4. `/mode 2d rows` sorts every row of a matrix at once");
+	say_text("4. `/mode 2d` sorts every row of a matrix at once (`/mode snake` sorts it as one sequence)");
 	say_text("5. `/gradient magma`, or your own: `/gradient #1e3a8a #f59e0b`");
 }
 

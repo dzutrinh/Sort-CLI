@@ -15,7 +15,7 @@ static const char * MODE_DESC[M_MODES] = {
 	"one row of bars",
 	"2D, sorted as one sequence in reading order",
 	"2D, sorted as one sequence in snake order",
-	"2D, every row sorted on its own, all at once",
+	"2D, every row sorted on its own, all at once (the default)",
 	"2D, every column sorted on its own, all at once",
 };
 
@@ -199,8 +199,9 @@ static void stats_line(SB * line, const VIEW * v, int k) {
 	          fg(C_DIM), k, v->total, fg(39), cm, fg(C_DIM), fg(C_ERR), sw, fg(C_DIM), fg(C_WARN), wr);
 }
 
-static void note_lines(LINES * out, SB * line, const LANE * L, int maxw) {
+static void note_lines(LINES * out, SB * line, const LANE * L, int maxw, const char * who) {
 	sb_puts(line, "  ");
+	if (who) sb_printf(line, "%s%s: ", fg(C_DIM), who);
 	SB d = {0};
 	describe(&d, L);
 	sb_printf(line, "%s%s", fg(C_TEXT), sb_str(&d));
@@ -241,7 +242,7 @@ static void render_bars(LINES * out, VIEW * v, int k, int cols, int maxrows, boo
 		add_line(out, &line, maxw);
 		stats_line(&line, v, k);
 		add_line(out, &line, maxw);
-		note_lines(out, &line, L, maxw);
+		note_lines(out, &line, L, maxw, NULL);
 	}
 	sb_free(&line);
 }
@@ -324,7 +325,10 @@ static void render_heat(LINES * out, VIEW * v, int k, int cols, int maxrows, boo
 	if (narrate) {
 		stats_line(&line, v, k);
 		add_line(out, &line, maxw);
-		note_lines(out, &line, &v->L[0], maxw);
+		char who[48];
+		if (v->map == M_ROWS || v->map == M_COLS)
+			snprintf(who, sizeof who, "%s 1 of %d", v->map == M_ROWS ? "row" : "column", v->nl);
+		note_lines(out, &line, &v->L[0], maxw, v->map == M_ROWS || v->map == M_COLS ? who : NULL);
 	}
 	sb_free(&line);
 }

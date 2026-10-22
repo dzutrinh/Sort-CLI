@@ -37,9 +37,10 @@ runs and merges show on arrays small enough to watch; `/data runs` shows it best
   get a green `━`, and `╰──╯` marks the part being worked on. Below: live comparison,
   swap and write counts, the current action (`compare a[3] = 7 with a[4] = 2`) and
   the algorithm's own note (`Merge runs a[0..15] and a[16..31]`).
-* **Matrix** (`/mode 2d`): values as a heatmap. `flat` sorts the matrix as one
-  sequence in reading order, `snake` in snake order, `rows` sorts every row on its
-  own all at once, `cols` every column.
+* **Matrix** (`/mode 2d`): values as a heatmap. By default every row is sorted on
+  its own, all rows at once, each finishing when its own data allows (`rows`). `cols`
+  does the same per column, `flat` sorts the matrix as one sequence in reading order
+  and `snake` in snake order.
 * **Race** (`/race a b c`): up to 8 algorithms on the same data, stacked; each lane
   finishes when its algorithm does, and the finish order is reported.
 * **Compare** (`/compare`): no animation, a table of comparisons, swaps, writes,
@@ -63,7 +64,7 @@ in windows smaller than 60×22, in piped mode, and with `/pet off`.
 | `/explain [algo]`, `/algos [category]`, `/use <algo>` | Learn about and pick algorithms |
 | `/data [kind] [n\|WxH]`          | New samples: `random`, `sorted`, `reversed`, `nearly`, `few`, `dups`, `runs`, `sawtooth`, `organ` |
 | `/data v1 v2 …`                  | Sort your own values |
-| `/size <n>\|<WxH>`, `/mode 1d\|2d [flat\|snake\|rows\|cols]`, `/show` | Size, layout, current samples |
+| `/size <n>\|<WxH>`, `/mode 1d\|2d [rows\|cols\|flat\|snake]`, `/show` | Size, layout (2D defaults to rows sorted at once), current samples |
 | `/seed [n\|random]`              | Every set of samples has a seed; the same seed, kind and size give the same samples |
 | `/gradient [preset [reverse]\|reverse\|colors…]` | 17 presets shared with Search-CLI: `rainbow` and `pastel` (from SortVis 0.6), `viridis`, `plasma`, `inferno`, `magma`, `cividis`, `turbo`, `ocean`, `fire`, `sunset`, `forest`, `ice`, `candy`, `cool`, `claude`, `grayscale`; or your own 2-18 stops: `/gradient #1e3a8a #f59e0b #fef3c7` (`#rrggbb`, `#rgb` or xterm 0-255) |
 | `/color [256\|truecolor]`        | 24-bit color is used when `COLORTERM` says the terminal supports it |
